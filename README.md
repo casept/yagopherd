@@ -5,7 +5,7 @@ It isn't very well optimized right now and doesn't support some of the protocol'
 
 ## TODO
 
-* Basic functionality
+* ~~Basic functionality (retrieve files/directory listings)~~
 * Gopher + support
 * `.gophermap` support
 * Support for linking to other servers (Probably via `.gophermap` files)
