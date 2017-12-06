@@ -29,3 +29,6 @@ Several features of the gopher protocol are no longer used in the wild. These wo
 * CSO server support (gophertype `2`)
 * Special treatment for binHexed files (gophertype `4`)
 * tn3270 session support (gophertype `T`)
+
+## License
+The Project is licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) license. See the LICENSE file for details.
