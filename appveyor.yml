@@ -1,0 +1,26 @@
+---
+version: build-{build}.{branch}
+platform:
+  - x64
+  - x86
+clone_folder: c:\gopath\src\github.com\casept\yagopherd
+environment:
+  GOPATH: c:\gopath
+
+install:
+  - echo %PATH%
+  - echo %GOPATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - go version
+  - go env
+
+build_script:
+  - make -e BINARY=out/yagopherd.exe
+
+test_script:
+  - make test
+
+artifacts:
+  path: out/yagopherd.exe
+  name: binary
+...
