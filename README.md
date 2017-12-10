@@ -10,13 +10,15 @@ It isn't very well optimized right now and doesn't support some of the protocol'
 ## TODO
 
 * ~~Basic functionality (retrieve files/directory listings)~~
+* A config file. All settings are currently passed as CLI arguments.
+* Different log levels
+* Log file support
 * Gopher + support
 * `.gophermap` support
 * Support for linking to other servers (Probably via `.gophermap` files)
 * Better differentiation between binary and text files (tricky!)
 * Search support
 * Support for telnet/SSH sessions
-* A config file. All settings are currently passed as CLI arguments.
 * ~~CI~~
 * Tests
 * HTTP gateway (maybe, should be simple, perhaps embed caddy?)
