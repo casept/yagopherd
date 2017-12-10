@@ -17,7 +17,7 @@ It isn't very well optimized right now and doesn't support some of the protocol'
 * Search support
 * Support for telnet/SSH sessions
 * A config file. All settings are currently passed as CLI arguments.
-* CI
+* ~~CI~~
 * Tests
 * HTTP gateway (maybe, should be simple, perhaps embed caddy?)
 * `chroot` support (maybe, requires server to start as root)
