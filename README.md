@@ -25,6 +25,7 @@ It isn't very well optimized right now and doesn't support some of the protocol'
 * Deciding gophertype based on mimetype instead of file extension (requires a good, cgo-free `libmagick`-like library)
 * Ability to use manually created `.gophermap` files instead of indexing automatically
 * General code cleanup
+* Caching
 
 ## Unplanned features
 
