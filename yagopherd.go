@@ -26,21 +26,22 @@ var (
 
 // Config contains configuration obtained from CLI args and the config file.
 var Config struct {
+	IsTesting     bool   // Whether tests are being run
 	RawGopherroot string // (Relative) path supplied by the user
 	Gopherroot    string // Expanded path
 	Port          int    // Port to listen on
 	Address       string // Address to listen on
-	RootSelector  string // The selector the client has to send to obtain a root listing
-	// TODO: maxRequestLength int // How many bytes a client can at most send (DOS protection)
-	IsTesting bool // Whether the server was started to run unit/integration tests.
 }
 
-// This struct is just used so gopher connection-specific methods can be cleanly declared.
+// This struct is just used so gopher-connection specific methods can be cleanly declared.
 type gopherConn struct {
 	net.Conn
 }
 
-func init() {
+// init() isn't used because it's ALWAYS run before the tests, so they can't set config values.
+// A good candidate for cleanup when the new config system is implemented.
+// FIXME: Clean this up
+func setup() {
 	// Set up config flags and insert them into a global config struct
 	// The test setup function sets these values itself, don't interfere with that
 	if Config.IsTesting == false {
@@ -53,12 +54,10 @@ func init() {
 
 		flag.StringVar(&Config.RawGopherroot, "gopherroot", defaultGopherroot, "path to directory which contains the content that should be served")
 		flag.IntVar(&Config.Port, "port", 7077, "port that yagopherd should listen on, the standard port 70 requires root/admin privileges")
-		// TODO: flag.IntVar(&Config.maxRequestLength, "max-request-length", 4096, "how many bytes a client can at most send as part of a single request (prevents DOS)")
 		flag.StringVar(&Config.Address, "address", "0.0.0.0", "Address that the server should listen on")
+
 		// Parse CLI args
 		flag.Parse()
-		// TODO
-		Config.RootSelector = "\r\n"
 	}
 
 	// Make path to gopherroot absolute
@@ -98,6 +97,8 @@ type gopherReq struct {
 }
 
 func main() {
+	// Run our "fake init()"
+	setup()
 	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", Config.Address, strconv.Itoa(Config.Port)))
 	if err != nil {
 		log.Panicf("Error while setting up listener: %v\n", err.Error())
@@ -174,7 +175,7 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	var gophermap gophermap
 
 	// The CRLF selector indicates we should send a root listing
-	if req.selector == Config.RootSelector {
+	if req.selector == "\r\n" {
 		req.path = Config.Gopherroot
 	} else {
 		req.path, err = appendDir(Config.Gopherroot, req.selector)

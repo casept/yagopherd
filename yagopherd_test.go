@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -16,17 +15,15 @@ import (
 	"github.com/phayes/freeport"
 )
 
-// Addr ist the Address of the server under test.
+// Addr is the Address of the server under test.
+// It's a global variable so that all test cases can access it easily.
 var Addr *net.TCPAddr
 
 // Start the server on a random high port assigned by the kernel
 func TestMain(m *testing.M) {
 	Config.IsTesting = true
 	var err error
-	Config.Gopherroot, err = filepath.Abs("./testdata/gopherroot")
-	if err != nil {
-		log.Fatal(err)
-	}
+	Config.RawGopherroot = "./testdata/gopherroot"
 	Config.Port, err = freeport.GetFreePort()
 	if err != nil {
 		log.Fatal(err)
@@ -37,6 +34,7 @@ func TestMain(m *testing.M) {
 	// A goroutine is used so the tests can be run at the same time
 	go main()
 
+	// Resolve the server's address for use in test cases.
 	Addr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", Config.Address, strconv.Itoa(Config.Port)))
 	if err != nil {
 		log.Fatal(err)
