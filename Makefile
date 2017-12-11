@@ -19,7 +19,7 @@ install:
 	go install ${LDFLAGS} -o ${BINARY} -v
 # Remove the binary
 clean:
-	if [ -f ${BINARY} ] ; then rm ${BINARY}; fi
+	if [ -f ${BINARY} ] ; then go clean; fi
 
 # Run tests
 test:
