@@ -1,15 +1,19 @@
 # yagopherd, yet another gopher server written in golang
 
 This is a simple implementation of a server for the `gopher` protocol as defined in [RFC 1436](https://tools.ietf.org/html/rfc1436) (with some parts omitted, see `unplanned features`).
-It isn't very well optimized right now and doesn't support some of the protocol's features, it's mostly a way for me to learn golang and writing servers. It's far from finished:
+It isn't very well optimized right now and doesn't support some of the protocol's features, it's mostly a way for me to learn golang and writing servers.
 
-[![Windows build status:](https://ci.appveyor.com/api/projects/status/ik3q9xkr6cc1eufw/branch/master?svg=true)](https://ci.appveyor.com/project/casept/yagopherd/branch/master)
-[![Linux/OSX build status:](https://travis-ci.org/casept/yagopherd.svg?branch=master)](https://travis-ci.org/casept/yagopherd)
+[![Windows build status](https://ci.appveyor.com/api/projects/status/ik3q9xkr6cc1eufw/branch/master?svg=true)](https://ci.appveyor.com/project/casept/yagopherd/branch/master)
+[![Linux/OSX build status](https://travis-ci.org/casept/yagopherd.svg?branch=master)](https://travis-ci.org/casept/yagopherd)
 [![Go Report Card](https://goreportcard.com/badge/github.com/casept/yagopherd)](https://goreportcard.com/report/github.com/casept/yagopherd)
 [![Coverage Status](https://coveralls.io/repos/github/casept/yagopherd/badge.svg?branch=master)](https://coveralls.io/github/casept/yagopherd?branch=master)
+
+The project's far from finished:
+
 ## TODO
 
 * ~~Basic functionality (retrieve files/directory listings)~~
+* Forcing immediate shutdown on second SIGTERM
 * A config file. All settings are currently passed as CLI arguments.
 * Different log levels
 * Log file support
@@ -28,6 +32,10 @@ It isn't very well optimized right now and doesn't support some of the protocol'
 * Ability to use manually created `.gophermap` files instead of indexing automatically
 * General code cleanup
 * Caching
+* DOS protection:
+	* Against "slowloris-like" attacks
+	* Rate limiting
+	* Bandwith limit per client
 
 ## Unplanned features
 
