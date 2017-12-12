@@ -27,6 +27,6 @@ test:
 
 # Just so the binary can be run easily from vim
 run: ${BINARY}
-	${BINARY}
+	./${BINARY}
 
 .PHONY: clean install test run
