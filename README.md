@@ -13,7 +13,7 @@ The project's far from finished:
 ## TODO
 
 * ~~Basic functionality (retrieve files/directory listings)~~
-* Forcing immediate shutdown on second SIGTERM
+* ~~Forcing immediate shutdown on second SIGTERM~~
 * A config file. All settings are currently passed as CLI arguments.
 * Different log levels
 * Log file support
