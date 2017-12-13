@@ -125,7 +125,15 @@ func main() {
 	// This isn't done in the main loop because that loop blocks on listener.Accept()
 	go func() {
 		sig := <-sigs
-		log.Printf("Received %v signal, waiting for request processing to finish...\n", sig.String())
+		log.Printf("Received %v signal, waiting for request processing to finish and other cleanup...\n", sig.String())
+		log.Print("Hit CTRL-C again if you wish to terminate without cleanup.")
+		// Launch another one if a second SIGTERM is received.
+		// This one terminates immediately, without doing any cleanup, useful if the program gets stuck.
+		go func() {
+			sig := <-sigs
+			log.Printf("Received second %v signal, forcing shutdown without cleanup!", sig.String())
+			os.Exit(0)
+		}()
 		wg.Wait()
 		// The tests return their own exit code, don't mess with that
 		if Config.IsTesting == false {
