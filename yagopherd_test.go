@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/phayes/freeport"
+	"github.com/spf13/viper"
 )
 
 // Addr is the Address of the server under test.
@@ -21,21 +22,24 @@ var Addr *net.TCPAddr
 
 // Start the server on a random high port assigned by the kernel
 func TestMain(m *testing.M) {
-	Config.IsTesting = true
+	// Tell yagopherd to not run stuff that would interfere with the tests
+	viper.Set("testmode", true)
+
 	var err error
-	Config.RawGopherroot = "./testdata/gopherroot"
-	Config.Port, err = freeport.GetFreePort()
+	viper.Set("gopherroot", "./testdata/gopherroot")
+	port, err := freeport.GetFreePort()
 	if err != nil {
 		log.Fatal(err)
 	}
-	Config.Address = "localhost"
+	viper.Set("port", port)
+	viper.Set("address", "localhost")
 
 	// Call main() to start the server
 	// A goroutine is used so the tests can be run at the same time
 	go main()
 
 	// Resolve the server's address for use in test cases.
-	Addr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", Config.Address, strconv.Itoa(Config.Port)))
+	Addr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", viper.GetString("address"), strconv.Itoa(viper.GetInt("port"))))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,7 +107,7 @@ func TestRoot(t *testing.T) {
 			diskGophermap = diskGophermap + "."
 			break
 		} else {
-			diskGophermap = diskGophermap + result[i] + "\t" + strconv.Itoa(Config.Port) + "\r\n"
+			diskGophermap = diskGophermap + result[i] + "\t" + strconv.Itoa(viper.GetInt("port")) + "\r\n"
 		}
 	}
 

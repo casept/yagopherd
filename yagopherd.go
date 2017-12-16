@@ -3,19 +3,17 @@ package main
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"syscall"
 
-	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/viper"
 )
 
 // Variables to identify the build
@@ -24,54 +22,9 @@ var (
 	Commit  string
 )
 
-// Config contains configuration obtained from CLI args and the config file.
-var Config struct {
-	IsTesting     bool   // Whether tests are being run
-	RawGopherroot string // (Relative) path supplied by the user
-	Gopherroot    string // Expanded path
-	Port          int    // Port to listen on
-	Address       string // Address to listen on
-}
-
 // This struct is just used so gopher-connection specific methods can be cleanly declared.
 type gopherConn struct {
 	net.Conn
-}
-
-// init() isn't used because it's ALWAYS run before the tests, so they can't set config values.
-// A good candidate for cleanup when the new config system is implemented.
-// FIXME: Clean this up
-func setup() {
-	// Set up config flags and insert them into a global config struct
-	// The test setup function sets these values itself, don't interfere with that
-	if Config.IsTesting == false {
-		// Set the default gopherroot to ~/.gopher
-		homedir, err := homedir.Dir()
-		if err != nil {
-			log.Fatalf("Unable to determine user's home directory: %v\n", err)
-		}
-		defaultGopherroot := homedir + "/.gopher"
-
-		flag.StringVar(&Config.RawGopherroot, "gopherroot", defaultGopherroot, "path to directory which contains the content that should be served")
-		flag.IntVar(&Config.Port, "port", 7077, "port that yagopherd should listen on, the standard port 70 requires root/admin privileges")
-		flag.StringVar(&Config.Address, "address", "0.0.0.0", "Address that the server should listen on")
-
-		// Parse CLI args
-		flag.Parse()
-	}
-
-	// Make path to gopherroot absolute
-	var err error
-	Config.Gopherroot, err = filepath.Abs(Config.RawGopherroot)
-	if err != nil {
-		log.Fatalf("Failed to expand relative path: %v", err)
-	}
-
-	// Make sure gopherroot directory exists and is readable
-	_, err = os.Stat(Config.Gopherroot)
-	if err != nil {
-		log.Fatalf("Cannot stat directory %v: %v", Config.Gopherroot, err)
-	}
 }
 
 // A gopherItem is one item that shows up on the client's menu for selection
@@ -97,11 +50,11 @@ type gopherReq struct {
 }
 
 func main() {
-	// Run our "fake init()"
-	setup()
-	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", Config.Address, strconv.Itoa(Config.Port)))
+	// Load viper config
+	setupConfig()
+	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", viper.Get("address"), viper.Get("port")))
 	if err != nil {
-		log.Panicf("Error while setting up listener: %v\n", err.Error())
+		log.Panicf("Error while setting up listener on address %v: %v\n", viper.GetString("addr"), err.Error())
 	}
 	// Could be empty if built by go build instead of make
 	if Version != "" {
@@ -114,7 +67,10 @@ func main() {
 	} else {
 		log.Printf("Commit: unknown\n")
 	}
-	log.Printf("Listening on %v:%v\n", Config.Address, strconv.Itoa(Config.Port))
+	if viper.ConfigFileUsed() != "" {
+		log.Printf("Using config file: %s\n", viper.ConfigFileUsed())
+	}
+	log.Printf("Listening on %v:%v\n", viper.GetString("address"), strconv.Itoa(viper.GetInt("port")))
 
 	// Set up some signal handling stuff to enable a clean shutdown
 	sigs := make(chan os.Signal, 1)
@@ -136,7 +92,7 @@ func main() {
 		}()
 		wg.Wait()
 		// The tests return their own exit code, don't mess with that
-		if Config.IsTesting == false {
+		if viper.GetBool("testmode") == false {
 			log.Println("Done, shutting down...")
 			os.Exit(0)
 		}
@@ -184,9 +140,9 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 
 	// The CRLF selector indicates we should send a root listing
 	if req.selector == "\r\n" {
-		req.path = Config.Gopherroot
+		req.path = viper.GetString("gopherroot")
 	} else {
-		req.path, err = appendDir(Config.Gopherroot, req.selector)
+		req.path, err = appendDir(viper.GetString("gopherroot"), req.selector)
 		if err != nil {
 			conn.sendErr(err)
 			return

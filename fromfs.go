@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // trimRootPath trims a supplied path by trimming off rootPath.
@@ -51,14 +53,14 @@ func dirToGophermap(path string) (gophermap gophermap, err error) {
 		gopherItem.displayString = files[i].Name()
 		// Have to make sure that the selector isn't the absolute path, but only the part not included in config.gopherroot.
 		// This is kinda messy
-		rawSelector, err := trimRootPath(Config.Gopherroot, filepath.Join(path, files[i].Name()))
+		rawSelector, err := trimRootPath(viper.GetString("gopherroot"), filepath.Join(path, files[i].Name()))
 		if err != nil {
 			return gophermap, err
 		}
 		// Also has to handle windows "\"-separated paths
 		gopherItem.selector = strings.Replace(rawSelector, "\\", "/", -1)
-		gopherItem.host = Config.Address
-		gopherItem.port = Config.Port
+		gopherItem.host = viper.GetString("address")
+		gopherItem.port = viper.GetInt("port")
 		gopherItem.fsLocation, err = filepath.Abs(filepath.Join(path, files[i].Name()))
 		if err != nil {
 			return gophermap, err
