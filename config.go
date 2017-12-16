@@ -13,16 +13,6 @@ import (
 
 // Sets up viper
 func setupConfig() {
-	// Viper setup
-	viper.SetConfigName("yagopherd")
-	// Add PWD to config search path
-	viper.AddConfigPath(".")
-	// Get OS-specific config paths
-	configDirs := configdir.New("yagopherd", "yagopherd")
-	// Add per-user config directory
-	viper.AddConfigPath(configDirs.GetFolder(configdir.Local))
-	// Add system default systemwide config directory
-	viper.AddConfigPath(configDirs.GetFolder(configdir.Global))
 
 	// Set defaults
 	homedir, err := homedir.Dir()
@@ -39,13 +29,29 @@ func setupConfig() {
 	pflag.StringP("gopherroot", "g", defaultGopherroot, "Path to the directory to be served.")
 	pflag.IntP("port", "p", 70, "The port to listen on. Default requires root/admin privileges.")
 	pflag.StringP("address", "a", "0.0.0.0", "An IPv4/v6 address to listen on. Multiple addresses are currently unsupported.")
+	pflag.StringP("config", "c", "", "Path to configuration file outside the standard config directories.")
 
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
-	// Set up automatic env var handling
-	viper.SetEnvPrefix("yagopherd") // Becomes "YAGOPHERD_"
-	viper.AutomaticEnv()
+	// Add the config file specified by the CLI flag if set
+	if viper.GetString("config") != "" {
+		viper.SetConfigFile(viper.GetString("config"))
+		// Only add the other config files if the user doesn't specify one using the flag.
+	} else {
+		viper.SetConfigName("yagopherd")
+		// Add PWD to config search path
+		viper.AddConfigPath(".")
+		// Get OS-specific config paths
+		configDirs := configdir.New("yagopherd", "yagopherd")
+		// Add per-user config directory
+		viper.AddConfigPath(configDirs.GetFolder(configdir.Local))
+		// Add system default systemwide config directory
+		viper.AddConfigPath(configDirs.GetFolder(configdir.Global))
+		// Set up automatic env var handling
+		viper.SetEnvPrefix("yagopherd") // Becomes "YAGOPHERD_"
+		viper.AutomaticEnv()
+	}
 
 	// Read config file
 	err = viper.ReadInConfig()
@@ -58,6 +64,7 @@ func setupConfig() {
 			_ = t
 		}
 	}
+
 	// Ensure gopherroot is an absolute path
 	absGopherroot, err := filepath.Abs(viper.GetString("gopherroot"))
 	if err != nil {
