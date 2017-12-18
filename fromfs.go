@@ -29,11 +29,11 @@ func trimRootPath(rootPath string, path string) (trimmedPath string, err error) 
 
 // dirToGophermap adds all files and directories in path to gophermap
 // This function currently ignores the contents of `.gophermap` files
-func dirToGophermap(path string) (gophermap gophermap, err error) {
+func dirToGophermap(path string, gopherP bool) (gophermap gophermap, err error) {
 	// Make sure the path is readable
 	fInfo, err := os.Stat(path)
 	if err != nil {
-		return gophermap, fmt.Errorf("failed to stat path %v: %v", path, err)
+		return gophermap, err
 	}
 	// Make sure it's a directory
 	if fInfo.IsDir() != true {
@@ -41,17 +41,17 @@ func dirToGophermap(path string) (gophermap gophermap, err error) {
 	}
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return gophermap, fmt.Errorf("failed to read directory %v: %v", path, err)
+		return gophermap, err
 	}
 	// Loop over the slice and fill in our gophermap
 	for i := 0; i < len(files); i++ {
 		var gopherItem gopherItem
-		gopherItem.gophertype, err = gophertype(filepath.Join(path, files[i].Name()))
+		gopherItem.gophertype, err = gophertype(filepath.Join(path, files[i].Name()), gopherP)
 		if err != nil {
 			return gophermap, err
 		}
 		gopherItem.displayString = files[i].Name()
-		// Have to make sure that the selector isn't the absolute path, but only the part not included in config.gopherroot.
+		// Have to make sure that the selector isn't the absolute path, but only the part not included in gopherroot.
 		// This is kinda messy
 		rawSelector, err := trimRootPath(viper.GetString("gopherroot"), filepath.Join(path, files[i].Name()))
 		if err != nil {

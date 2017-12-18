@@ -155,7 +155,7 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	}
 
 	if fInfo.IsDir() == true {
-		gophermap, err = dirToGophermap(req.path)
+		gophermap, err = dirToGophermap(req.path, req.gopherP)
 		if err != nil {
 			conn.sendErr(err)
 			return
