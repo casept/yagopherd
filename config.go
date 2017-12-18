@@ -24,12 +24,14 @@ func setupConfig() {
 	viper.SetDefault("port", 70)
 	viper.SetDefault("address", "0.0.0.0")
 	viper.SetDefault("testmode", false)
+	viper.SetDefault("gopherplus", true)
 
 	// Set up CLI flags using pflag
 	pflag.StringP("gopherroot", "g", defaultGopherroot, "Path to the directory to be served.")
 	pflag.IntP("port", "p", 70, "The port to listen on. Default requires root/admin privileges.")
 	pflag.StringP("address", "a", "0.0.0.0", "An IPv4/v6 address to listen on. Multiple addresses are currently unsupported.")
 	pflag.StringP("config", "c", "", "Path to configuration file outside the standard config directories.")
+	pflag.BoolP("gopherplus", "+", true, "Toggle gopherplus support.")
 
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
