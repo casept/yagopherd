@@ -88,42 +88,6 @@ func appendDir(root string, userPath string) (path string, err error) {
 	return path, nil
 }
 
-// gophertype gets the gopher response code via file extension
-// Might get replaced with MIME type sniffing in the future, although it will be slower due to having to open the file to check magic numbers (and possibly require cgo).
-// Some clients might also depend on file extensions.
-// TODO: Implement some of the more obscure content types and gopher+/nonstandart server extensions
-func gophertype(path string) (gophertype string, err error) {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return "", fmt.Errorf("Failed to stat file %v: %v", path, err)
-	}
-	if fi.IsDir() == true {
-		return "1", nil
-	}
-	fileExt := strings.ToLower(filepath.Ext(path))
-	switch fileExt {
-	//Image formats
-	//Might move these to a global array later
-	case ".jpg", ".jpeg", ".jp2", ".jpx", ".tiff", ".tif", ".bmp", ".png", ".webp", ".pbm", ".pgm", ".ppm", ".pnm", "heif", ".heic", ".bpg", ".ecw", ".fits", ".fit", ".fts", ".flif", ".ico", ".jxr", ".hdp", ".svg":
-		return "I", nil
-	// Spec treats GIF specially
-	case ".gif":
-		return "g", nil
-	// DOS/Windows executables
-	case ".com", ".exe":
-		return "5", nil
-	// Text files of various kinds
-	// TODO: Expand this list
-	case ".txt", ".md", ".rtf":
-		return "0", nil
-
-	// Other types of files
-	// We assume unknown files are binaries, that way the user is prompted to download them instead of seeing a bunch of gibberish
-	default:
-		return "9", nil
-	}
-}
-
 // sendFile sends a file specified by path over the connection
 func (conn gopherConn) sendFile(path string) (err error) {
 	file, err := os.Open(path)
