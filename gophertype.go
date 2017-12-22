@@ -25,9 +25,9 @@ func gophertype(path string, gopherP bool) (gophertype string, err error) {
 	// Gopher and Gopher+ specify different image identifiers
 	var picID string
 	if gopherP {
-		picID = "I"
-	} else {
 		picID = ":"
+	} else {
+		picID = "I"
 	}
 	gophertypes[".jpg"] = picID
 	gophertypes[".jpeg"] = picID

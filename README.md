@@ -18,6 +18,14 @@ The project's far from finished:
 * Different log levels
 * Log file support
 * Gopher + support
+	* Handle legacy clients
+	* Signal g+ support
+	* Send size of files w/ response when possible
+	* Support gopher+ errors
+	* Support gopher+ attributes
+		* ADMIN
+		* INFO
+		* VIEWS
 * `.gophermap` support
 * Support for linking to other servers (Probably via `.gophermap` files)
 * Better differentiation between binary and text files (tricky!)

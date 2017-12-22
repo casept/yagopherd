@@ -1,0 +1,7 @@
+1test	/test	localhost
+5test.exe	/test.exe	localhost
+gtest.gif	/test.gif	localhost
+:test.jpg	/test.jpg	localhost
+0test.txt	/test.txt	localhost
+9test.unknownfiletype	/test.unknownfiletype	localhost
+.

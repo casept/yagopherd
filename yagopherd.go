@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"sync"
 	"syscall"
 
@@ -21,33 +18,6 @@ var (
 	Version string
 	Commit  string
 )
-
-// This struct is just used so gopher-connection specific methods can be cleanly declared.
-type gopherConn struct {
-	net.Conn
-}
-
-// A gopherItem is one item that shows up on the client's menu for selection
-type gopherItem struct {
-	gophertype    string // Gophertype of the item
-	displayString string // Display string that the client will render
-	selector      string // Selector that the client sends to retrieve the item
-	host          string // Hostname of the server the item resides on
-	port          int    // Port of the server the item resides on
-	fsLocation    string // Absolute path to the location on the filesystem (blank if item is remote)
-	mimetype      string // Mimetype of the item
-}
-
-// A gophermap is a flat slice of gopherItems
-type gophermap struct {
-	items []gopherItem
-}
-
-// GopherReq holds all information related to a client request (but not the response, that's gopherItem's job)
-type gopherReq struct {
-	selector string // Selector the client sent
-	path     string // Path to the requested item
-}
 
 func main() {
 	// Load viper config
@@ -120,26 +90,15 @@ func main() {
 // handleReq handles an incoming request by parsing the selector and sending the selected content to the client.
 func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	defer wg.Done()
-	var req gopherReq
-	// Extract the selector from response
-	rd := bufio.NewReader(conn)
-	var err error
-	// TODO: Limit number of bytes read to avoid DOS, make that configurable
-	rawStr, err := rd.ReadString('\n')
-	// Remove the \r\n sent at the end of a request (this one was fun to debug... not.)
-	// Kinda messy, fuck it
-	req.selector = strings.TrimRight(rawStr, "\n\r")
+	defer conn.Close()
 
+	// Extract attributes of the request
+	req, err := extractReq(conn)
 	if err != nil {
-		// Abort the goroutine if selector extraction fails
-		log.Printf("Error while trying to process selector: %v", err)
-		return
+		conn.sendErr(err)
 	}
-
-	var gophermap gophermap
-
-	// The CRLF selector indicates we should send a root listing
-	if req.selector == "\r\n" {
+	// Blank selector = request for gopherroot
+	if req.selector == "" {
 		req.path = viper.GetString("gopherroot")
 	} else {
 		req.path, err = appendDir(viper.GetString("gopherroot"), req.selector)
@@ -155,7 +114,7 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	}
 
 	if fInfo.IsDir() == true {
-		gophermap, err = dirToGophermap(req.path, req.gopherP)
+		gophermap, err := dirToGophermap(req.path, req.gopherP)
 		if err != nil {
 			conn.sendErr(err)
 			return
@@ -165,48 +124,13 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 			conn.sendErr(err)
 		}
 	} else {
-		err = conn.sendFile(req.path)
+		err = conn.sendFile(req.path, req.gopherP)
 		if err != nil {
 			conn.sendErr(err)
 			return
 		}
 	}
-
-	conn.Close()
 	return
-}
-
-// serialize serializes a gophermap.
-func (gophermap *gophermap) serialize() (serializedGophermap []byte, err error) {
-	// Check whether all required fields are filled out
-	for i := 0; i < len(gophermap.items); i++ {
-		if len(gophermap.items[i].gophertype) == 0 || len(gophermap.items[i].displayString) == 0 || len(gophermap.items[i].selector) == 0 || len(gophermap.items[i].host) == 0 || gophermap.items[i].port == 0 {
-			return []byte{}, errors.New("gophermap is invalid")
-		}
-	}
-
-	var serializedString string
-	for i := 0; i < len(gophermap.items); i++ {
-		// TODO:
-		fmt.Printf(gophermap.items[i].gophertype)
-		serializedString = serializedString + gophermap.items[i].gophertype + gophermap.items[i].displayString + "\t" + gophermap.items[i].selector + "\t" + gophermap.items[i].host + "\t" + strconv.Itoa(gophermap.items[i].port) + "\r\n"
-	}
-	// Response must end with a "."
-	serializedString = serializedString + "."
-	return []byte(serializedString), nil
-}
-
-// send sends the gohpermap over conn.
-func (gophermap gophermap) send(conn gopherConn) (err error) {
-	sGophermap, err := gophermap.serialize()
-	if err != nil {
-		return err
-	}
-	_, err = conn.Write(sGophermap)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // sendErr sends an error to the client and closes the connection.

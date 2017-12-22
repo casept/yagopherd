@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -89,13 +90,23 @@ func appendDir(root string, userPath string) (path string, err error) {
 }
 
 // sendFile sends a file specified by path over the connection
-func (conn gopherConn) sendFile(path string) (err error) {
+func (conn gopherConn) sendFile(path string, gopherP bool) (err error) {
 	file, err := os.Open(path)
-	log.Print("File:" + path)
 	defer file.Close()
 	if err != nil {
 		return err
 	}
+
+	// gopher+ requires prepending the filesize.
+	if gopherP {
+		log.Printf("GOPHER++++++++!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+		fInfo, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		io.WriteString(conn, "+"+strconv.Itoa(int(fInfo.Size()))+"\r\n")
+	}
+
 	_, err = io.Copy(conn, file)
 	if err != nil {
 		return fmt.Errorf("Error while sending file %v: %v", path, err.Error())
