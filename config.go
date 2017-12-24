@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/casept/configdir"
 	"github.com/mitchellh/go-homedir"
@@ -25,6 +26,8 @@ func setupConfig() {
 	viper.SetDefault("address", "0.0.0.0")
 	viper.SetDefault("testmode", false)
 	viper.SetDefault("gopherplus", true)
+	viper.SetDefault("selectorlimit", 8192)
+	viper.SetDefault("selectortimeout", 5*time.Second)
 
 	// Set up CLI flags using pflag
 	pflag.StringP("gopherroot", "g", defaultGopherroot, "Path to the directory to be served.")
@@ -32,6 +35,8 @@ func setupConfig() {
 	pflag.StringP("address", "a", "0.0.0.0", "An IPv4/v6 address to listen on. Multiple addresses are currently unsupported.")
 	pflag.StringP("config", "c", "", "Path to configuration file outside the standard config directories.")
 	pflag.BoolP("gopherplus", "+", true, "Toggle gopherplus support.")
+	pflag.IntP("selectorlimit", "l", 4096, "How many bytes the client can send in the selector. Don't set this too high or clients might be able to DoS the server by exhausting memory.")
+	pflag.DurationP("selectortimeout", "t", 5*time.Second, "How long to wait from a client connecting to finishing sending it's selector. Don't set this too high or clients might be able to DoS the server with a \"slowloris-style\" attack.")
 
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
