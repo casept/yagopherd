@@ -9,15 +9,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-// GopherReq holds all information related to a client request (but not the response, that's gopherItem's job)
-type gopherReq struct {
+// Req holds all information related to a client request (but not the response, that's gopherItem's job)
+type req struct {
 	selector string // Selector the client sent (blank=client requested gopherroot)
 	path     string // Path to the requested item
 	gopherP  bool   // Whether the client supports gopher+
 }
 
-// extractReq extracts data about a request from the receiving gopherConn.
-func extractReq(conn gopherConn) (req gopherReq, err error) {
+// extractReq extracts data about a request from the receiving net.Conn.
+func extractReq(conn net.Conn) (req req, err error) {
 	// This needs to work on \r\n (gohper client) and \r\n\t+ (gopher+ client).
 	// Therefore bufio's ReadString() cannot be used.
 	// So we read for no more than 0.2 seconds, then check if output ends in "\n" or "+"
@@ -42,22 +42,21 @@ func extractReq(conn gopherConn) (req gopherReq, err error) {
 		}
 		// Increase the time counter, when it exceeds the allowed value the connection times out.
 		t = t + 200*time.Millisecond
+		if t >= viper.GetDuration("selectortimeout") {
+			return req, fmt.Errorf("selector reception timed out (took %v)", t.String())
+		}
+
 		// Check if the buf slice would be over capacity by appending.
 		if len(tmp)+len(buf) > cap(buf) {
 			return req, fmt.Errorf("client selector exceeds maximum allowed length (sent %d bytes, %d bytes allowed)", len(tmp)+len(buf), cap(buf))
 		}
 		buf = append(buf, tmp[:n]...)
+
 		// Check the last symbol in the buffer to see whether the client has finished.
 		if len(buf) > 1 {
 			if buf[len(buf)-1] == '+' || buf[len(buf)-1] == '\n' {
 				break
-			} else {
-				// Check for timeout
-				if t >= viper.GetDuration("selectortimeout") {
-					return req, fmt.Errorf("selector reception timed out (took %v)", t.String())
-				}
 			}
-
 		}
 	}
 	// Unset the deadline.
