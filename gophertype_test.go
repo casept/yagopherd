@@ -20,7 +20,7 @@ func BenchmarkGophertype(b *testing.B) {
 	// Extract the names of files ASAP so it doesn't affect the actual benchmarking loop.
 	var testFiles []string
 	for _, file := range rawTestFiles {
-		testFiles = append(testFiles, filepath.Join("./testdata/", file.Name()))
+		testFiles = append(testFiles, filepath.Join("./testdata/gopherroot", file.Name()))
 	}
 
 	for n := 0; n < b.N; n++ {
