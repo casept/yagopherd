@@ -52,8 +52,8 @@
 [[projects]]
   name = "github.com/spf13/afero"
   packages = [".","mem"]
-  revision = "8d919cbe7e2627e417f3e45c3c0e489a5b7e2536"
-  version = "v1.0.0"
+  revision = "ec3a3111d1e1bdff38a61e09d5a5f5e974905611"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/spf13/cast"
@@ -83,13 +83,13 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "d5840adf789d732bc8b00f37b26ca956a7cc8e79"
+  revision = "83801418e1b59fb1880e363299581ee543af32ca"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
   packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
-  revision = "d5a9226ed7dd70cade6ccae9d37517fe14dd9fee"
+  revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
 
 [[projects]]
   branch = "v2"
