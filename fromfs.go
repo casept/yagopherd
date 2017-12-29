@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -31,6 +30,8 @@ func trimRootPath(rootPath string, path string) (trimmedPath string, err error) 
 // dirToGophermap adds all files and directories in path to gophermap
 // This function currently ignores the contents of `.gophermap` files
 func dirToGophermap(path string, gopherP bool) (gophermap gophermap, err error) {
+	// Indicate it's a gopher+ gophermap if told to
+	gophermap.gopherP = gopherP
 	// Make sure the path is readable
 	fInfo, err := os.Stat(path)
 	if err != nil {
@@ -99,7 +100,6 @@ func (conn gopherConn) sendFile(path string, gopherP bool) (err error) {
 
 	// gopher+ requires prepending the filesize.
 	if gopherP {
-		log.Printf("GOPHER++++++++!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
 		fInfo, err := os.Stat(path)
 		if err != nil {
 			return err
