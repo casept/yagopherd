@@ -38,8 +38,9 @@ func (gophermap *gophermap) serialize() (serializedGophermap []byte, err error) 
 	}
 
 	var itemTerminator string
+	// Add a \t+ after the port to indicate item supports gopher+
 	if gophermap.gopherP == true {
-		itemTerminator = "\r\n\t+"
+		itemTerminator = "\t+\r\n"
 	} else {
 		itemTerminator = "\r\n"
 	}
