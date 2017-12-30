@@ -27,6 +27,7 @@ func setupConfig() {
 	viper.SetDefault("testmode", false)
 	viper.SetDefault("selectorlimit", 8192)
 	viper.SetDefault("selectortimeout", 5*time.Second)
+	viper.SetDefault("admin", "fakeadmin@fakegopherhole.example.com")
 
 	// Set up CLI flags using pflag
 	pflag.StringP("gopherroot", "g", defaultGopherroot, "Path to the directory to be served.")
@@ -35,6 +36,7 @@ func setupConfig() {
 	pflag.StringP("config", "c", "", "Path to configuration file outside the standard config directories.")
 	pflag.IntP("selectorlimit", "l", 4096, "How many bytes the client can send in the selector. Don't set this too high or clients might be able to DoS the server by exhausting memory.")
 	pflag.DurationP("selectortimeout", "t", 5*time.Second, "How long to wait from a client connecting to finishing sending it's selector. Don't set this too high or clients might be able to DoS the server with a \"slowloris-style\" attack.")
+	pflag.StringP("admin", "m", "fakeadmin@fakegopherhole.example.com", "The E-mail address of the server admin. Displayed to clients in error messages and the ADMIN: field of gopher+ items.")
 
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
