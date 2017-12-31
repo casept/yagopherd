@@ -95,51 +95,49 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	// Extract attributes of the request
 	req, err := extractReq(conn)
 	if err != nil {
-		conn.sendErr(err)
+		// As the function failed it's unknown whether client supports gopher+, assume gopher
+		conn.sendErr(err.Error(), unknownErr, false)
 	}
+
 	// Blank selector = request for gopherroot
 	if req.selector == "" {
 		req.path = viper.GetString("gopherroot")
 	} else {
 		req.path, err = appendDir(viper.GetString("gopherroot"), req.selector)
 		if err != nil {
-			conn.sendErr(err)
+			conn.sendErr(err.Error(), unknownErr, req.gopherP)
 			return
 		}
 	}
+
 	fInfo, err := os.Stat(req.path)
 	if err != nil {
-		conn.sendErr(err)
+		// TODO: Find out syscall error codes and only send itemNotFoundError when appropriate
+		conn.sendItemNotFoundErr(req.selector, req.gopherP)
 		return
 	}
 
 	if fInfo.IsDir() == true {
 		gophermap, err := dirToGophermap(req.path, req.gopherP)
 		if err != nil {
-			conn.sendErr(err)
+			if _, ok := err.(*os.PathError); ok {
+				conn.sendItemNotFoundErr(req.path, req.gopherP)
+			} else {
+				conn.sendErr(err.Error(), unknownErr, req.gopherP)
+			}
 			return
 		}
 		err = gophermap.send(conn)
 		if err != nil {
-			conn.sendErr(err)
+			conn.sendErr(err.Error(), unknownErr, req.gopherP)
+			return
 		}
 	} else {
 		err = conn.sendFile(req.path, req.gopherP)
 		if err != nil {
-			conn.sendErr(err)
+			conn.sendErr(err.Error(), unknownErr, req.gopherP)
 			return
 		}
 	}
 	return
-}
-
-// sendErr sends an error to the client and closes the connection.
-func (conn gopherConn) sendErr(errorMsg error) (err error) {
-	log.Printf("Sending error to client: %v\n", errorMsg)
-	resp := fmt.Sprintf("3" + errorMsg.Error() + "\r\n" + ".")
-	_, err = conn.Write([]byte(resp))
-	if err != nil {
-		return fmt.Errorf("error while sending error message to %v: %v", conn.RemoteAddr(), err.Error())
-	}
-	return nil
 }
