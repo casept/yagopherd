@@ -69,7 +69,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	process.Signal(os.Interrupt)
-	// The shutdown handler has no way to know whether the tests were successfull, therefore we do our own os.Exit() with our own return code.
+	// The shutdown handler has no way to know whether the tests were successful, therefore we do our own os.Exit() with our own return code.
 	os.Exit(retCode)
 }
 
@@ -148,6 +148,9 @@ func TestDownload(t *testing.T) {
 			// Retrieve the same file from disk, check if the received one is identical.
 			var diskFile []byte
 			diskFile, err = ioutil.ReadFile("./testdata/gopherroot/" + file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			if bytes.Equal(receivedFile, diskFile) == false {
 				// Dump out both files in hex if they don't match.
