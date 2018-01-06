@@ -23,8 +23,24 @@
 
 [[constraint]]
   branch = "master"
+  name = "github.com/casept/configdir"
+
+[[constraint]]
+  name = "github.com/go-test/deep"
+  version = "1.0.0"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/mitchellh/go-homedir"
 
 [[constraint]]
   name = "github.com/phayes/freeport"
   version = "1.0.2"
+
+[[constraint]]
+  name = "github.com/spf13/pflag"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "1.0.0"
