@@ -26,7 +26,7 @@ The project's far from finished:
 		* ADMIN
 		* INFO
 		* VIEWS
-		* user-defined attributes
+		* user-defined attributes (requires support for attribute files)
 * `.gophermap` support
 * Support for linking to other servers (Probably via `.gophermap` files)
 * Better differentiation between binary and text files (tricky!)
@@ -34,6 +34,8 @@ The project's far from finished:
 * Support for telnet/SSH sessions
 * ~~CI~~
 * Tests
+* Stress tests
+* Benchmarks
 * HTTP gateway (maybe, should be simple, perhaps embed caddy?)
 * `chroot` support (maybe, requires server to start as root)
 * Redundant server support (maybe)
@@ -106,7 +108,6 @@ The config file must be within one of these directories, named `yagopherd.replac
 
 Environment variables can be used as well. Simply prefix the CLI flag's name with `YAGOPHERD_`.
 For example, `export YAGOPHERD_PORT=1337` would set the port the server listens on to `1337`.
-
 
 ## License
 
