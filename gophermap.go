@@ -70,7 +70,7 @@ func (gophermap *gophermap) serialize() (serializedGophermap []byte, err error) 
 		if err != nil {
 			return []byte{}, fmt.Errorf("gophermap is invalid: %v", err)
 		}
-		serializedString, err = serializedString + nextItem + itemTerminator
+		serializedString = serializedString + nextItem + itemTerminator
 	}
 
 	// Response must end with a "."
