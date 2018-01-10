@@ -79,7 +79,7 @@ func (gophermap *gophermap) serialize() (serializedGophermap []byte, err error) 
 }
 
 // send sends the gohpermap over conn.
-func (gophermap gophermap) send(conn gopherConn) (err error) {
+func (conn gopherConn) sendGophermap(gohpermap gophermap) (err error) {
 	sGophermap, err := gophermap.serialize()
 	if err != nil {
 		return err

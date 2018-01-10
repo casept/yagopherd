@@ -127,7 +127,7 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 			}
 			return
 		}
-		err = gophermap.send(conn)
+		err = conn.sendGophermap(gophermap)
 		if err != nil {
 			conn.sendErr(err.Error(), unknownErr, req.gopherP)
 			return
