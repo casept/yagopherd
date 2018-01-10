@@ -55,7 +55,7 @@ type gophermap struct {
 }
 
 // serialize serializes a gophermap.
-func (gophermap *gophermap) serialize() (serializedGophermap []byte, err error) {
+func (gophermap gophermap) serialize() (serializedGophermap []byte, err error) {
 	var itemTerminator string
 	// Add a \t+ after the port to indicate item supports gopher+
 	if gophermap.gopherP == true {
