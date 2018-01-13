@@ -3,13 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net"
 )
-
-// gopherConn is just used so gopher-connection specific methods can be cleanly declared.
-type gopherConn struct {
-	net.Conn
-}
 
 // A gopherItem is one item that shows up on the client's menu for selection
 type gopherItem struct {
