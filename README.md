@@ -33,7 +33,7 @@ The project's far from finished:
 * Search support
 * Support for telnet/SSH sessions
 * ~~CI~~
-* Tests
+* ~~Tests~~
 * Stress tests
 * Benchmarks
 * HTTP gateway (maybe, should be simple, perhaps embed caddy?)
