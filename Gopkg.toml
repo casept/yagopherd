@@ -26,6 +26,10 @@
   name = "github.com/casept/configdir"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/casept/sanitize"
+
+[[constraint]]
   name = "github.com/go-test/deep"
   version = "1.0.0"
 

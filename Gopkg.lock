@@ -8,6 +8,12 @@
   revision = "2c5429a1489b422c869d31006ae632da2f9dc4bf"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/casept/sanitize"
+  packages = ["."]
+  revision = "4e0b77b96bfd3795e0231f2b02eeabdd62e4c3f6"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "629574ca2a5df945712d3079857300b5e4da0236"
@@ -106,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8978e6f26d16d9f42f4054a8d986beb6abe6d1ad3103341964ccef6ced73c1ca"
+  inputs-digest = "df58e0136550b326b1da302476c22880db1d6b13747b41a762ec69b28db322ad"
   solver-name = "gps-cdcl"
   solver-version = 1
