@@ -95,33 +95,39 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	// Extract attributes of the request
 	req, err := extractReq(conn)
 	if err != nil {
-		// As the function failed it's unknown whether client supports gopher+, assume gopher
+		// As the function failed it's unknown whether client supports gopher+, assume gopher for compatibility reasons.
 		conn.sendErr(err.Error(), unknownErr, false)
 	}
 
-	// Blank selector = request for gopherroot
-	if req.selector == "" {
-		req.path = viper.GetString("gopherroot")
-	} else {
-		req.path, err = appendDir(viper.GetString("gopherroot"), req.selector)
-		if err != nil {
-			conn.sendErr(err.Error(), unknownErr, req.gopherP)
-			return
-		}
-	}
-
-	fInfo, err := os.Stat(req.path)
+	item, err := constructGopherItem(req.selector, req.gopherP)
 	if err != nil {
-		// TODO: Find out syscall error codes and only send itemNotFoundError when appropriate
-		conn.sendItemNotFoundErr(req.selector, req.gopherP)
+		if os.IsNotExist(err) {
+			conn.sendItemNotFoundErr(req.selector, req.gopherP)
+		} else {
+			conn.sendErr(err.Error(), unknownErr, req.gopherP)
+		}
 		return
 	}
 
+	// TODO: Make this work for remote items
+	fInfo, err := os.Stat(item.fsLocation)
+	if err != nil {
+		if os.IsNotExist(err) {
+			conn.sendItemNotFoundErr(req.selector, req.gopherP)
+		} else {
+			conn.sendErr(err.Error(), unknownErr, req.gopherP)
+		}
+		return
+	}
+
+
+	// Handle regular requests
+	// TODO: Factor out into separate function
 	if fInfo.IsDir() == true {
-		gophermap, err := dirToGophermap(req.path, req.gopherP)
+		gophermap, err := reqToGophermap(req)
 		if err != nil {
-			if _, ok := err.(*os.PathError); ok {
-				conn.sendItemNotFoundErr(req.path, req.gopherP)
+			if os.IsNotExist(err) {
+				conn.sendItemNotFoundErr(req.selector, req.gopherP)
 			} else {
 				conn.sendErr(err.Error(), unknownErr, req.gopherP)
 			}
@@ -133,10 +139,14 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 			return
 		}
 	} else {
-		err = conn.sendFile(req.path, req.gopherP)
+		err = conn.sendFile(item.fsLocation, req.gopherP)
 		if err != nil {
-			conn.sendErr(err.Error(), unknownErr, req.gopherP)
-			return
+			if os.IsNotExist(err) {
+				conn.sendItemNotFoundErr(req.selector, req.gopherP)
+			} else {
+				conn.sendErr(err.Error(), unknownErr, req.gopherP)
+				return
+			}
 		}
 	}
 	return

@@ -1,51 +1,50 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 )
-
-// A gopherItem is one item that shows up on the client's menu for selection
-type gopherItem struct {
-	gophertype    string // Gophertype of the item
-	displayString string // Display string that the client will render
-	selector      string // Selector that the client sends to retrieve the item
-	host          string // Hostname of the server the item resides on
-	port          int    // Port of the server the item resides on
-	isFS          bool   // Whether item resides on FS
-	isRemote      bool   // Whether item resides on remote server
-	fsLocation    string // Absolute path to the location on the filesystem (blank if item is remote)
-	mimetype      string // Mimetype of the item
-}
-
-// serialize serializes a gopherItem into a string.
-// Note that the serialized string isn't terminated by \r\n or any other gopher(+) gophermap item terminator.
-func (g *gopherItem) serialize() (serializedGopherItem string, err error) {
-	// Check whether all required fields are filled out
-	if len(g.gophertype) == 0 {
-		return "", errors.New("gopherItem is invalid (gophertype missing)")
-	}
-	if len(g.displayString) == 0 {
-		return "", errors.New("gopherItem is invalid (displayString missing)")
-	}
-	if len(g.selector) == 0 {
-		return "", errors.New("gopherItem is invalid (selector missing)")
-	}
-	if len(g.host) == 0 {
-		return "", errors.New("gopherItem is invalid (host missing)")
-	}
-	if g.port == 0 {
-		return "", errors.New("gopherItem is invalid (port missing)")
-	}
-
-	return fmt.Sprintf("%v%v\t%v\t%v\t%d", g.gophertype, g.displayString, g.selector, g.host, g.port), nil
-
-}
 
 // A gophermap is a flat slice of gopherItems
 type gophermap struct {
 	items   []gopherItem
-	gopherP bool // Whether to use gopher+
+	gopherP bool // Whether to use gopher+ to send the gophermap
+}
+
+// reqToGophermap returns the unserialized gophermap for a given gooherReq.
+// This function currently ignores the contents of `.gophermap` files, aka only local items are currently supported.
+func reqToGophermap(req req) (gophermap gophermap, err error) {
+	gophermap.gopherP = req.gopherP
+	dirPath, err := selectorToPath(req.selector)
+	if err != nil {
+		return gophermap, err
+	}
+
+	// Make sure the dirPath is readable
+	fInfo, err := os.Stat(dirPath)
+	if err != nil {
+		return gophermap, err
+	}
+	// Make sure it's a directory
+	if fInfo.IsDir() == false {
+		return gophermap, fmt.Errorf("supplied path %v is not a directory", dirPath)
+	}
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return gophermap, err
+	}
+
+	// Loop over the slice and fill in our gophermap
+	for i := 0; i < len(files); i++ {
+		// constructGopherItem expects a selector
+		gopherItem, err := constructGopherItem(fmt.Sprintf("%v/%v", req.selector, files[i].Name()), req.gopherP)
+		if err != nil {
+			return gophermap, err
+		}
+		gophermap.items = append(gophermap.items, gopherItem)
+	}
+	return gophermap, nil
 }
 
 // serialize serializes a gophermap.
@@ -72,7 +71,7 @@ func (gophermap gophermap) serialize() (serializedGophermap []byte, err error) {
 	return []byte(serializedString), nil
 }
 
-// send sends the gohpermap over conn.
+// send sends the gophermap over conn.
 func (conn gopherConn) sendGophermap(gmap gophermap) (err error) {
 	sGophermap, err := gmap.serialize()
 	if err != nil {
