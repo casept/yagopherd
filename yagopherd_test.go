@@ -11,53 +11,64 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Test obtaining the gopherroot
-func TestRoot(t *testing.T) {
-	// Setup connection
-	conn, err := net.DialTCP("tcp", nil, Addr)
-	if err != nil {
-		t.Fatal(err)
+// Test obtaining gophermaps of various directories
+func TestGophermap(t *testing.T) {
+	tc := []struct {
+		selector  string // Selector that should result in gophermap
+		gophermap string // The expected gophermap (without ports, those are appended dynamically)
+		gopherP   bool   // Whether it's a gopher+ gophermap
+	}{
+		{"\r\n", "1test\t/test\tlocalhost\r\n5test.exe\t/test.exe\tlocalhost\r\ngtest.gif\t/test.gif\tlocalhost\r\nItest.jpg\t/test.jpg\tlocalhost\r\n0test.txt\t/test.txt\tlocalhost\r\n9test.unknownfiletype\t/test.unknownfiletype\tlocalhost\r\n.", false},
+		{"\r\n\t+", "1test\t/test\tlocalhost\r\n5test.exe\t/test.exe\tlocalhost\r\ngtest.gif\t/test.gif\tlocalhost\r\n:test.jpg\t/test.jpg\tlocalhost\r\n0test.txt\t/test.txt\tlocalhost\r\n9test.unknownfiletype\t/test.unknownfiletype\tlocalhost\r\n.", true},
 	}
-	defer conn.Close()
 
-	// Request the gopherroot's gophermap
-	_, err = conn.Write([]byte("\r\n"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	receivedGophermap, err := ioutil.ReadAll(conn)
-	if err != nil {
-		t.Fatalf("Error while trying to read server response: %v", err)
-	}
-	// The ./testdata/gophermap file contains a known-good gophermap of the test data directory.
-	var rawDiskFile []byte
-	rawDiskFile, err = ioutil.ReadFile("./testdata/gophermap")
-	if err != nil {
-		t.Fatal(err)
-	}
-	// We have to append the ephemeral port of the gopher server to each line of the file
-	// Break down into lines (split on newline)
-	result := strings.Split(string(rawDiskFile), "\r\n")
-	// Reconstruct the contents of the file, appending the port where needed
-	var diskGophermap string
-	for i := range result {
-		if result[i] == "." {
-			diskGophermap = diskGophermap + "."
-			break
-		} else {
-			diskGophermap = diskGophermap + result[i] + "\t" + strconv.Itoa(viper.GetInt("port")) + "\r\n"
+	for _, tt := range tc {
+		// Setup connection
+		conn, err := net.DialTCP("tcp", nil, Addr)
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
 
-	if bytes.Equal(receivedGophermap, []byte(diskGophermap)) == false {
-		t.Logf("Received gophermap does not match expected gophermap:\n received:\n%v\n expected:\n%v\n", string(receivedGophermap), string(diskGophermap))
-		t.Fail()
+		// Request the gophermap
+		_, err = conn.Write([]byte(tt.selector))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		receivedGophermap, err := ioutil.ReadAll(conn)
+		if err != nil {
+			t.Fatalf("Error while trying to read server response: %v", err)
+		}
+
+		// We have to append the ephemeral port of the gopher server to each line of the test gophermap
+		// Break down into lines
+		var AppendStr string
+		if tt.gopherP {
+			AppendStr = "\t+\r\n"
+		} else {
+			AppendStr = "\r\n"
+		}
+		result := strings.Split(string(tt.gophermap), "\r\n")
+		// Reconstruct the contents of the file, appending the port where needed
+		var testGophermap string
+		for i := range result {
+			if result[i] == "." {
+				testGophermap = testGophermap + "."
+				break
+			} else {
+				testGophermap = testGophermap + result[i] + "\t" + strconv.Itoa(viper.GetInt("port")) + AppendStr
+			}
+		}
+
+		if bytes.Equal(receivedGophermap, []byte(testGophermap)) == false {
+			t.Errorf("Received gophermap does not match expected gophermap:\n received:\n%v\n expected:\n%v\n", string(receivedGophermap), string(testGophermap))
+		}
+		conn.Close()
 	}
 }
 
 // Test downloading files
 func TestDownload(t *testing.T) {
-
 	testFiles, err := ioutil.ReadDir("./testdata/gopherroot")
 	if err != nil {
 		t.Fatal(err)
