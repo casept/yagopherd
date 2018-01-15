@@ -23,7 +23,7 @@ func TestGopherPGophermap(t *testing.T) {
 	}
 	receivedGophermap, err := ioutil.ReadAll(conn)
 	if err != nil {
-		t.Fatalf("Error while trying to read server response: %v", err)
+		t.Fatal(err)
 	}
 	// The ./testdata/gopherpgophermap file contains a known-good gophermap of the test data directory.
 	var rawDiskFile []byte
