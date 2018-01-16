@@ -78,12 +78,9 @@ func main() {
 
 	// Main listener loop
 	for {
-		// TODO: Refuse any new incoming connections upon shutdown init
 		rawConn, err := listener.Accept()
-		conn := gopherConn{
-			rawConn,
-		}
-		defer conn.Close()
+		conn := gopherConn{rawConn}
+		// defer conn.Close() not used here because it causes a segfault when program is stopped.
 
 		if err != nil {
 			log.Printf("An error occurred while trying to accept request: %v\n", err.Error())
@@ -92,13 +89,13 @@ func main() {
 			wg.Add(1)
 			go handleReq(conn, wg)
 		}
+		conn.Close()
 	}
 }
 
 // handleReq handles an incoming request by parsing the selector and sending the selected content to the client.
 func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer conn.Close()
 
 	// Extract attributes of the request
 	req, err := extractReq(conn)
