@@ -60,10 +60,18 @@ func main() {
 			log.Printf("Received second %v signal, forcing shutdown without cleanup!", sig.String())
 			os.Exit(0)
 		}()
+		// Close the listener so no new connections are accepted, then wait for remaining handlers to finish.
+		log.Print("Stopping listener...")
+		err = listener.Close()
+		if err != nil {
+			log.Print("Couldn't stop listener, panicking!")
+			panic(err)
+		}
+		log.Print("Waiting for remaining requests to be served...")
 		wg.Wait()
 		// The tests return their own exit code, don't mess with that
 		if viper.GetBool("testmode") == false {
-			log.Println("Done, shutting down...")
+			log.Println("Done, shutting down.")
 			os.Exit(0)
 		}
 	}()
