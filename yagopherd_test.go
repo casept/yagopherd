@@ -18,8 +18,14 @@ func TestGophermap(t *testing.T) {
 		gophermap string // The expected gophermap (without ports, those are appended dynamically)
 		gopherP   bool   // Whether it's a gopher+ gophermap
 	}{
+		// Gopher gopherroot
 		{"\r\n", "1test\t/test\tlocalhost\r\n5test.exe\t/test.exe\tlocalhost\r\ngtest.gif\t/test.gif\tlocalhost\r\nItest.jpg\t/test.jpg\tlocalhost\r\n0test.txt\t/test.txt\tlocalhost\r\n9test.unknownfiletype\t/test.unknownfiletype\tlocalhost\r\n.", false},
+		// Gopher+ gopherroot
 		{"\r\n\t+", "1test\t/test\tlocalhost\r\n5test.exe\t/test.exe\tlocalhost\r\ngtest.gif\t/test.gif\tlocalhost\r\n:test.jpg\t/test.jpg\tlocalhost\r\n0test.txt\t/test.txt\tlocalhost\r\n9test.unknownfiletype\t/test.unknownfiletype\tlocalhost\r\n.", true},
+		// Gopher subdir
+		{"/test", "1test2\t/test/test2\tlocalhost\r\n5test2.exe\t/test/test2.exe\tlocalhost\r\ngtest2.gif\t/test/test2.gif\tlocalhost\r\nItest2.jpg\t/test/test2.jpg\tlocalhost\r\n0test2.txt\t/test/test2.txt\tlocalhost\r\n9test2.unknownfiletype\t/test/test2.unknownfiletype\tlocalhost\r\n.", false},
+		// Gopher+ subdir
+		{"/test\t+", "1test2\t/test/test2\tlocalhost\r\n5test2.exe\t/test/test2.exe\tlocalhost\r\ngtest2.gif\t/test/test2.gif\tlocalhost\r\n:test2.jpg\t/test/test2.jpg\tlocalhost\r\n0test2.txt\t/test/test2.txt\tlocalhost\r\n9test2.unknownfiletype\t/test/test2.unknownfiletype\tlocalhost\r\n.", true},
 	}
 
 	for _, tt := range tc {
