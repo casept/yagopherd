@@ -70,7 +70,7 @@ func main() {
 		log.Print("Waiting for remaining requests to be served...")
 		wg.Wait()
 		// The tests return their own exit code, don't mess with that
-		if viper.GetBool("testmode") == false {
+		if !viper.GetBool("testmode") {
 			log.Println("Done, shutting down.")
 			os.Exit(0)
 		}
@@ -95,18 +95,18 @@ func handleReq(conn gopherConn, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer conn.Close()
 	// Extract attributes of the request
-	req, err := extractReq(conn)
+	request, err := extractReq(conn)
 	if err != nil {
 		// As the function failed it's unknown whether client supports gopher+, assume gopher for compatibility reasons.
 		conn.sendErr(err.Error(), unknownErr, false)
 	}
 
-	item, err := constructGopherItem(req.selector, req.gopherP)
+	item, err := constructGopherItem(request.selector, request.gopherP)
 	if err != nil {
 		if os.IsNotExist(err) {
-			conn.sendItemNotFoundErr(req.selector, req.gopherP)
+			conn.sendItemNotFoundErr(trimSelector(request.selector), request.gopherP)
 		} else {
-			conn.sendErr(err.Error(), unknownErr, req.gopherP)
+			conn.sendErr(err.Error(), unknownErr, request.gopherP)
 		}
 		return
 	}

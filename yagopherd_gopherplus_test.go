@@ -18,7 +18,7 @@ func TestGopherPDownload(t *testing.T) {
 	for _, file := range testFiles {
 		// This only handles files at the root of the gopherroot, but that's sufficient for test purposes.
 		// Only handle files, directory listing retrieval testing handled separately
-		if file.IsDir() == false {
+		if !file.IsDir() {
 			// Connections cannot be reused in the gopher protocol.
 			// Therefore create a new one each time.
 			conn, err := net.DialTCP("tcp", nil, Addr)
@@ -43,7 +43,7 @@ func TestGopherPDownload(t *testing.T) {
 			// Subtract the already appended "\r\n" from the total length of the file
 			diskFile = append([]byte(strconv.Itoa(len(diskFile)-2)), diskFile...)
 			diskFile = append([]byte("+"), diskFile...)
-			if bytes.Equal(receivedFile, diskFile) == false {
+			if !bytes.Equal(receivedFile, diskFile) {
 				// Dump out both files in hex if they don't match.
 				t.Logf("Received file %v does not match expected file:\n received:\n%v\n expected: \n%v\n", file.Name(), string(receivedFile), string(diskFile))
 				t.Fail()

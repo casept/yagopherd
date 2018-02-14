@@ -27,7 +27,7 @@ func reqToGophermap(req req) (gophermap gophermap, err error) {
 		return gophermap, err
 	}
 	// Make sure it's a directory
-	if fInfo.IsDir() == false {
+	if !fInfo.IsDir() {
 		return gophermap, fmt.Errorf("supplied path %v is not a directory", dirPath)
 	}
 	files, err := ioutil.ReadDir(dirPath)
@@ -38,11 +38,11 @@ func reqToGophermap(req req) (gophermap gophermap, err error) {
 	// Loop over the slice and fill in our gophermap
 	for i := 0; i < len(files); i++ {
 		// constructGopherItem expects a selector
-		gopherItem, err := constructGopherItem(fmt.Sprintf("%v/%v", req.selector, files[i].Name()), req.gopherP)
+		item, err := constructGopherItem(fmt.Sprintf("%v/%v", req.selector, files[i].Name()), req.gopherP)
 		if err != nil {
 			return gophermap, err
 		}
-		gophermap.items = append(gophermap.items, gopherItem)
+		gophermap.items = append(gophermap.items, item)
 	}
 	return gophermap, nil
 }
