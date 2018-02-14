@@ -1,1 +1,6 @@
 vendor/
+testdata/
+LICENSE
+README.md
+Gopkg.lock
+Gopkg.toml
