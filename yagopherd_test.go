@@ -109,8 +109,7 @@ func TestDownload(t *testing.T) {
 
 			if !bytes.Equal(receivedFile, diskFile) {
 				// Dump out both files in hex if they don't match.
-				t.Logf("Received file %v does not match expected file:\n received:\n%v\n expected: \n%v\n", file.Name(), string(receivedFile), string(diskFile))
-				t.Fail()
+				t.Errorf("Received file %v does not match expected file:\n received:\n%v\n expected: see %v\n", file.Name(), string(receivedFile), file.Name())
 			}
 		}
 	}

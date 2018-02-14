@@ -38,6 +38,9 @@ func TestGopherPDownload(t *testing.T) {
 
 			// Retrieve the same file from disk.
 			diskFile, err := ioutil.ReadFile("./testdata/gopherroot/" + file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
 			// Prepend the length of the file (as it should be returned by a gopher+ server if known).
 			diskFile = append([]byte("\r\n"), diskFile...)
 			// Subtract the already appended "\r\n" from the total length of the file
@@ -45,8 +48,7 @@ func TestGopherPDownload(t *testing.T) {
 			diskFile = append([]byte("+"), diskFile...)
 			if !bytes.Equal(receivedFile, diskFile) {
 				// Dump out both files in hex if they don't match.
-				t.Logf("Received file %v does not match expected file:\n received:\n%v\n expected: \n%v\n", file.Name(), string(receivedFile), string(diskFile))
-				t.Fail()
+				t.Errorf("Received file %v does not match expected file:\n received:\n%v\n expected: see %v\n", file.Name(), string(receivedFile), file.Name())
 			}
 		}
 	}
