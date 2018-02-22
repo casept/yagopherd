@@ -23,7 +23,7 @@ clean:
 
 # Run tests
 test:
-	go test -bench "." ./...
+	go test -race -bench "." ./...
 
 # Just so the binary can be run easily from vim
 run: ${BINARY}
