@@ -67,7 +67,7 @@ func TestGophermap(t *testing.T) {
 		}
 
 		if !bytes.Equal(receivedGophermap, []byte(testGophermap)) {
-			t.Errorf("Received gophermap does not match expected gophermap:\n received:\n%v\n expected:\n%v\n", string(receivedGophermap), string(testGophermap))
+			t.Errorf("Received gophermap does not match expected gophermap (selector %q):\n received:\n%v\n expected:\n%v\n", tt.selector, string(receivedGophermap), string(testGophermap))
 		}
 		conn.Close()
 	}

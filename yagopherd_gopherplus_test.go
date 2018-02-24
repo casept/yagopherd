@@ -26,7 +26,8 @@ func TestGopherPDownload(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer conn.Close()
-			_, err = conn.Write([]byte(file.Name() + "\r\n\t+"))
+			selector := file.Name() + "\r\n\t+"
+			_, err = conn.Write([]byte(selector))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -48,7 +49,7 @@ func TestGopherPDownload(t *testing.T) {
 			diskFile = append([]byte("+"), diskFile...)
 			if !bytes.Equal(receivedFile, diskFile) {
 				// Dump out both files in hex if they don't match.
-				t.Errorf("Received file %v does not match expected file:\n received:\n%v\n expected: see %v\n", file.Name(), string(receivedFile), file.Name())
+				t.Errorf("Received file %v (selector %q) does not match expected file:\n received:\n%v\n expected: see %v\n", file.Name(), selector, string(receivedFile), file.Name())
 			}
 		}
 	}
