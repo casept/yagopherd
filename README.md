@@ -18,15 +18,15 @@ The project's far from finished:
 * Different log levels
 * Log file support
 * Gopher + support
-	* ~~Handle legacy clients~~
-	* ~~Signal g+ support~~
-	* ~~Send size of files w/ response when possible~~
-	* ~~Support gopher+ errors~~
-	* Support gopher+ attributes
-		* ADMIN
-		* INFO
-		* VIEWS
-		* user-defined attributes (requires support for attribute files)
+    * ~~Handle legacy clients~~
+    * ~~Signal g+ support~~
+    * ~~Send size of files w/ response when possible~~
+    * ~~Support gopher+ errors~~
+    * Support gopher+ attributes
+        * ADMIN
+        * INFO
+        * VIEWS
+        * user-defined attributes (requires support for attribute files)
 * `.gophermap` support
 * Support for linking to other servers (Probably via `.gophermap` files)
 * Better differentiation between binary and text files (tricky!)
@@ -44,9 +44,10 @@ The project's far from finished:
 * General code cleanup
 * Caching
 * DOS protection:
-	* Against "slowloris-like" attacks
-	* Rate limiting
-	* Bandwith limit per client
+    * Against "slowloris-like" attacks
+    * Rate limiting
+    * Bandwith limit per client
+* Context and cancellation when connection drops
 
 ## Unplanned features
 
@@ -89,21 +90,21 @@ yagopherd --help
 These values can also be set by config file.
 The following locations are searched for config files (Each item takes precedence over the item below it):
 * On \*nix :
-	* The present working directory
-	* `$XDG_CONFIG_HOME/yagopherd/yagohperd/` (`$HOME/.config/yagopherd/yagopherd/` by default)
-	* `$XDG_CONFIG_DIRS/yagopherd/yagopherd` (`/etc/xdg/yagopherd/yagopherd/` by default)
+    * The present working directory
+    * `$XDG_CONFIG_HOME/yagopherd/yagohperd/` (`$HOME/.config/yagopherd/yagopherd/` by default)
+    * `$XDG_CONFIG_DIRS/yagopherd/yagopherd` (`/etc/xdg/yagopherd/yagopherd/` by default)
 
 * On windows:
-	* The present working directory
-	* `%APPDATA%/yagopherd/yagopherd`
-	* `%PROGRAMDATA%/yagopherd/yagopherd`
+    * The present working directory
+    * `%APPDATA%/yagopherd/yagopherd`
+    * `%PROGRAMDATA%/yagopherd/yagopherd`
 
 * On MacOS/OSX:
-	* The present working directory
-	* `${HOME}/Library/Application Support/yagopherd/yagopherd`
-	* `/Library/Application Support/yagopherd/yagopherd`
+    * The present working directory
+    * `${HOME}/Library/Application Support/yagopherd/yagopherd`
+    * `/Library/Application Support/yagopherd/yagopherd`
 
-The config file must be within one of these directories, named `yagopherd.replacewithformat` and in `TOML`, `YAML`, `JSON`, `HCL` or `Java properties` format.
+The config file must be within one of these directories, named `yagopherd.replace-with-your-format` and in `TOML`, `YAML`, `JSON`, `HCL` or `Java properties` format.
 `TOML` is the format used in the documentation.
 
 Environment variables can be used as well. Simply prefix the CLI flag's name with `YAGOPHERD_`.
